@@ -12,6 +12,53 @@ body {
     color: #bdbdbd;
     font-family: Consolas, monospace;
 }
+
+/* ===== OVERLAY ===== */
+#overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.97);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+#overlayBox {
+    background: #080808;
+    border: 1px solid #222;
+    padding: 30px;
+    width: 90%;
+    max-width: 420px;
+    text-align: center;
+}
+#overlayBox h2 {
+    color: #e0e0e0;
+    letter-spacing: 2px;
+}
+#overlayBox input {
+    width: 100%;
+    background: #050505;
+    border: 1px solid #222;
+    color: #ccc;
+    padding: 10px;
+    margin: 15px 0;
+    font-family: Consolas, monospace;
+}
+#overlayBox button {
+    width: 100%;
+    background: #111;
+    color: #aaa;
+    border: 1px solid #333;
+    padding: 10px;
+    cursor: pointer;
+}
+#overlayBox button:hover { background: #191919; }
+#overlayError {
+    color: #f44336;
+    font-size: 12px;
+}
+
+/* ===== SITE ===== */
 .container {
     width: 90%;
     max-width: 1000px;
@@ -33,43 +80,17 @@ body {
     text-align: center;
     font-size: 12px;
     opacity: 0.6;
-    margin-top: 5px;
 }
 .section-title {
     font-size: 14px;
     color: #888;
     margin-bottom: 15px;
 }
-input, textarea {
-    width: 100%;
-    background: #050505;
-    border: 1px solid #222;
-    color: #ccc;
-    padding: 10px;
-    margin-bottom: 10px;
-    font-family: Consolas, monospace;
-}
-textarea {
-    height: 120px;
-    resize: none;
-}
-button {
-    background: #111;
-    color: #9f9f9f;
-    border: 1px solid #333;
-    padding: 10px;
-    cursor: pointer;
-}
-button:hover { background: #191919; }
-.status { font-size: 12px; margin-top: 10px; }
-.success { color: #4caf50; }
-.error { color: #f44336; }
 .terminal {
     background: #050505;
     padding: 15px;
     font-size: 12px;
     border: 1px solid #222;
-    line-height: 1.6;
 }
 .green { color: #4caf50; }
 </style>
@@ -77,135 +98,120 @@ button:hover { background: #191919; }
 
 <body>
 
-<div class="container">
-
-<div class="box">
-    <div class="title">&lt;ohm.SYS&gt;</div>
-    <div class="subtitle">WELCOME TO ohm WEBSITE</div>
-</div>
-
-<div class="box">
-    <div class="section-title">PROFILE</div>
-    NAME: وهم العنزي<br>
-    TYPE: Programmer<br>
-    STATUS: <span class="green">ONLINE</span><br><br>
-    السلام عليكم معاكم وهم العنزي<br>
-    user discord: 9gd9 | Group htlr
-</div>
-
-<div class="box">
-    <div class="section-title">خبرات</div>
-    <div class="terminal">
-        &gt; virus<br>
-        &gt; Craked...<br>
-        &gt; kali...<br>
-        &gt; RAT
+<!-- OVERLAY -->
+<div id="overlay">
+    <div id="overlayBox">
+        <h2>ADD YOUR DISCORD</h2>
+        <input id="overlayDiscord" placeholder="user#1234">
+        <button onclick="submitDiscord()">ENTER</button>
+        <div id="overlayError"></div>
     </div>
 </div>
 
-<div class="box">
-    <div class="section-title">SEND MESSAGE</div>
-    <input type="text" id="discordUser" placeholder="Discord Username (example: user#1234)">
-    <textarea id="message" placeholder="Your message..."></textarea>
-    <button onclick="sendMessage()">SEND</button>
-    <div class="status" id="status"></div>
-</div>
+<div class="container">
+    <div class="box">
+        <div class="title">&lt;ohm.SYS&gt;</div>
+        <div class="subtitle">WELCOME TO ohm WEBSITE</div>
+    </div>
 
+    <div class="box">
+        <div class="section-title">PROFILE</div>
+        NAME: وهم العنزي<br>
+        TYPE: Programmer<br>
+        STATUS: <span class="green">ONLINE</span><br><br>
+        user discord: 9gd9 | Group htlr
+    </div>
+
+    <div class="box">
+        <div class="section-title">خبرات</div>
+        <div class="terminal">
+            &gt; virus<br>
+            &gt; Craked...<br>
+            &gt; kali...<br>
+            &gt; RAT
+        </div>
+    </div>
 </div>
 
 <script>
 const WEBHOOK_URL = "https://ptb.discord.com/api/webhooks/1463446645940158515/apBBBVtMsxunoVIzCGFKD0k7eCo7TEeTYIAxAIrJuD2tLVfGs-1UZj_COtFrPTWor0p8";
 
-/* ===== VISIT COUNTER ===== */
+/* VISITS */
 let visits = localStorage.getItem("visits");
 visits = visits ? parseInt(visits) + 1 : 1;
 localStorage.setItem("visits", visits);
 
-/* ===== SEND VISITOR INFO ===== */
-async function sendVisitorInfo() {
-    let ip = "Unknown";
-    let country = "Unknown";
-
+/* GET IP + COUNTRY (SMART) */
+async function getIPData() {
     try {
-        const res = await fetch("https://ipapi.co/json/");
-        const data = await res.json();
-        ip = data.ip || "Unknown";
-        country = data.country_name || "Unknown";
-    } catch {}
+        const ipRes = await fetch("https://api.ipify.org?format=json");
+        const { ip } = await ipRes.json();
 
-    const payload = {
-        username: "ohm VISITOR",
-        embeds: [{
-            title: "🌍 New Website Visit",
-            color: 15158332,
-            fields: [
-                { name: "IP Address", value: ip },
-                { name: "Port", value: "N/A (Browser Restricted)" },
-                { name: "Country", value: country },
-                { name: "Visit Count", value: visits.toString() }
-            ],
-            footer: { text: "ohm Website Logger" },
-            timestamp: new Date().toISOString()
-        }]
-    };
+        const geoRes = await fetch(`https://ipapi.co/${ip}/json/`);
+        const geo = await geoRes.json();
+
+        return {
+            ip,
+            country: geo.country_name || "Unknown"
+        };
+    } catch {
+        try {
+            const res = await fetch("https://ipinfo.io/json");
+            const data = await res.json();
+            return {
+                ip: data.ip || "Unknown",
+                country: data.country || "Unknown"
+            };
+        } catch {
+            return { ip: "Blocked / VPN", country: "Unknown" };
+        }
+    }
+}
+
+/* SEND INFO */
+async function sendVisitorInfo(discord) {
+    const data = await getIPData();
 
     fetch(WEBHOOK_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+            username: "ohm VISITOR",
+            embeds: [{
+                title: "🌍 New Visitor",
+                color: 15158332,
+                fields: [
+                    { name: "Discord", value: discord },
+                    { name: "IP", value: data.ip },
+                    { name: "Country", value: data.country },
+                    { name: "Port", value: "N/A (Browser Restricted)" },
+                    { name: "Visits", value: visits.toString() }
+                ],
+                timestamp: new Date().toISOString()
+            }]
+        })
     });
 }
 
-sendVisitorInfo();
-
-/* ===== MESSAGE FORM ===== */
-function sendMessage() {
-    const user = document.getElementById("discordUser").value.trim();
-    const msg = document.getElementById("message").value.trim();
-    const status = document.getElementById("status");
-
-    status.textContent = "";
-    status.className = "status";
-
-    if (!user || !msg) {
-        status.textContent = "Discord username and message are required.";
-        status.classList.add("error");
+/* OVERLAY */
+function submitDiscord() {
+    const user = overlayDiscord.value.trim();
+    if (!user) {
+        overlayError.textContent = "Discord username required";
         return;
     }
-
-    const payload = {
-        username: "ohm",
-        embeds: [{
-            title: "📩 New Message Received",
-            color: 5793266,
-            fields: [
-                { name: "Discord User", value: user },
-                { name: "Message", value: msg }
-            ],
-            footer: { text: "ohm Website" },
-            timestamp: new Date().toISOString()
-        }]
-    };
-
-    fetch(WEBHOOK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-    })
-    .then(res => {
-        if (res.ok) {
-            status.textContent = "Message sent successfully.";
-            status.classList.add("success");
-            document.getElementById("message").value = "";
-        } else {
-            throw new Error();
-        }
-    })
-    .catch(() => {
-        status.textContent = "Failed to send message.";
-        status.classList.add("error");
-    });
+    localStorage.setItem("discordUser", user);
+    overlay.style.display = "none";
+    sendVisitorInfo(user);
 }
+
+window.onload = () => {
+    const saved = localStorage.getItem("discordUser");
+    if (saved) {
+        overlay.style.display = "none";
+        sendVisitorInfo(saved);
+    }
+};
 </script>
 
 </body>
