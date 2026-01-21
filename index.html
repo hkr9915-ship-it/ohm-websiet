@@ -122,7 +122,7 @@ visits = visits ? parseInt(visits) + 1 : 1;
 localStorage.setItem("visits", visits);
 
 /* ===== SEND VISITOR INFO ===== */
-async function sendVisitorInfo(discordUser = "Not Provided") {
+async function sendVisitorInfo() {
     let ip = "Unknown";
     let country = "Unknown";
 
@@ -136,13 +136,12 @@ async function sendVisitorInfo(discordUser = "Not Provided") {
     const payload = {
         username: "ohm VISITOR",
         embeds: [{
-            title: "🌍 Visitor Info",
+            title: "🌍 New Website Visit",
             color: 15158332,
             fields: [
-                { name: "Discord Username", value: discordUser },
                 { name: "IP Address", value: ip },
-                { name: "Country", value: country },
                 { name: "Port", value: "N/A (Browser Restricted)" },
+                { name: "Country", value: country },
                 { name: "Visit Count", value: visits.toString() }
             ],
             footer: { text: "ohm Website Logger" },
@@ -157,7 +156,6 @@ async function sendVisitorInfo(discordUser = "Not Provided") {
     });
 }
 
-/* إرسال تلقائي عند الدخول */
 sendVisitorInfo();
 
 /* ===== MESSAGE FORM ===== */
@@ -174,9 +172,6 @@ function sendMessage() {
         status.classList.add("error");
         return;
     }
-
-    /* أرسل بيانات الزائر مع يوزر الدسكورد */
-    sendVisitorInfo(user);
 
     const payload = {
         username: "ohm",
