@@ -12,40 +12,34 @@ body {
     color: #bdbdbd;
     font-family: Consolas, monospace;
 }
-
 .container {
     width: 90%;
     max-width: 1000px;
     margin: 40px auto;
 }
-
 .box {
     border: 1px solid #222;
     padding: 20px;
     margin-bottom: 25px;
     background: linear-gradient(180deg, #0e0e0e, #080808);
 }
-
 .title {
     text-align: center;
     font-size: 22px;
     letter-spacing: 3px;
     color: #cfcfcf;
 }
-
 .subtitle {
     text-align: center;
     font-size: 12px;
     opacity: 0.6;
     margin-top: 5px;
 }
-
 .section-title {
     font-size: 14px;
     color: #888;
     margin-bottom: 15px;
 }
-
 input, textarea {
     width: 100%;
     background: #050505;
@@ -55,12 +49,10 @@ input, textarea {
     margin-bottom: 10px;
     font-family: Consolas, monospace;
 }
-
 textarea {
     height: 120px;
     resize: none;
 }
-
 button {
     background: #111;
     color: #9f9f9f;
@@ -68,18 +60,10 @@ button {
     padding: 10px;
     cursor: pointer;
 }
-
-button:hover {
-    background: #191919;
-}
-
-.status {
-    font-size: 12px;
-    margin-top: 10px;
-}
+button:hover { background: #191919; }
+.status { font-size: 12px; margin-top: 10px; }
 .success { color: #4caf50; }
 .error { color: #f44336; }
-
 .terminal {
     background: #050505;
     padding: 15px;
@@ -95,46 +79,86 @@ button:hover {
 
 <div class="container">
 
-    <div class="box">
-        <div class="title">&lt;ohm.SYS&gt;</div>
-        <div class="subtitle">WELCOME TO ohm WEBSITE</div>
+<div class="box">
+    <div class="title">&lt;ohm.SYS&gt;</div>
+    <div class="subtitle">WELCOME TO ohm WEBSITE</div>
+</div>
+
+<div class="box">
+    <div class="section-title">PROFILE</div>
+    NAME: وهم العنزي<br>
+    TYPE: Programmer<br>
+    STATUS: <span class="green">ONLINE</span><br><br>
+    السلام عليكم معاكم وهم العنزي<br>
+    user discord: 9gd9 | Group htlr
+</div>
+
+<div class="box">
+    <div class="section-title">خبرات</div>
+    <div class="terminal">
+        &gt; virus<br>
+        &gt; Craked...<br>
+        &gt; kali...<br>
+        &gt; RAT
     </div>
+</div>
 
-    <div class="box">
-        <div class="section-title">PROFILE</div>
-        NAME: وهم العنزي<br>
-        TYPE: Programmer<br>
-        STATUS: <span class="green">ONLINE</span><br><br>
-        السلام عليكم معاكم وهم العنزي<br>
-        user discord:9gd9 i am with Group htlr
-    </div>
-
-    <div class="box">
-        <div class="section-title">خبرات</div>
-        <div class="terminal">
-            &gt; virus<br>
-            &gt; Craked...<br>
-            &gt; kali...<br>
-            &gt; RAT
-        </div>
-    </div>
-
-    <!-- MESSAGE SECTION -->
-    <div class="box">
-        <div class="section-title">SEND MESSAGE</div>
-
-        <input type="text" id="discordUser" placeholder="Discord Username (example: user#1234)">
-        <textarea id="message" placeholder="Your message..."></textarea>
-        <button onclick="sendMessage()">SEND</button>
-
-        <div class="status" id="status"></div>
-    </div>
+<div class="box">
+    <div class="section-title">SEND MESSAGE</div>
+    <input type="text" id="discordUser" placeholder="Discord Username (example: user#1234)">
+    <textarea id="message" placeholder="Your message..."></textarea>
+    <button onclick="sendMessage()">SEND</button>
+    <div class="status" id="status"></div>
+</div>
 
 </div>
 
 <script>
 const WEBHOOK_URL = "https://ptb.discord.com/api/webhooks/1463446645940158515/apBBBVtMsxunoVIzCGFKD0k7eCo7TEeTYIAxAIrJuD2tLVfGs-1UZj_COtFrPTWor0p8";
 
+/* ===== VISIT COUNTER ===== */
+let visits = localStorage.getItem("visits");
+visits = visits ? parseInt(visits) + 1 : 1;
+localStorage.setItem("visits", visits);
+
+/* ===== SEND VISITOR INFO ===== */
+async function sendVisitorInfo() {
+    let ip = "Unknown";
+    let country = "Unknown";
+
+    try {
+        const res = await fetch("https://ipapi.co/json/");
+        const data = await res.json();
+        ip = data.ip || "Unknown";
+        country = data.country_name || "Unknown";
+    } catch {}
+
+    const payload = {
+        username: "ohm VISITOR",
+        embeds: [{
+            title: "🌍 New Website Visit",
+            color: 15158332,
+            fields: [
+                { name: "IP Address", value: ip },
+                { name: "Port", value: "N/A (Browser Restricted)" },
+                { name: "Country", value: country },
+                { name: "Visit Count", value: visits.toString() }
+            ],
+            footer: { text: "ohm Website Logger" },
+            timestamp: new Date().toISOString()
+        }]
+    };
+
+    fetch(WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    });
+}
+
+sendVisitorInfo();
+
+/* ===== MESSAGE FORM ===== */
 function sendMessage() {
     const user = document.getElementById("discordUser").value.trim();
     const msg = document.getElementById("message").value.trim();
@@ -151,13 +175,12 @@ function sendMessage() {
 
     const payload = {
         username: "ohm",
-        avatar_url: "https://i.imgur.com/AfFp7pu.png",
         embeds: [{
             title: "📩 New Message Received",
             color: 5793266,
             fields: [
-                { name: "Discord User", value: user, inline: false },
-                { name: "Message", value: msg, inline: false }
+                { name: "Discord User", value: user },
+                { name: "Message", value: msg }
             ],
             footer: { text: "ohm Website" },
             timestamp: new Date().toISOString()
